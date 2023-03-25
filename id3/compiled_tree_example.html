@@ -7,29 +7,21 @@
 </head>
 <body>
 <pre><code class="language-mermaid"><div class="mermaid">flowchart LR
-A0("decision: vant")
-A0 -- da --> A1
-A1("decision: timp")
-A1 -- însorit --> A2
-A2("result = nu")
-A1 -- înnorat --> A3
-A3("result = da")
-A1 -- ploaie --> A4
-A4("result = nu")
-A0 -- nu --> A5
-A5("decision: timp")
-A5 -- însorit --> A6
-A6("result = da")
-A5 -- înnorat --> A7
-A7("decision: temperatura")
-A7 -- cald --> A8
-A8("result = da")
-A7 -- moderat --> A9
-A9("result = nu")
-A7 -- rece --> A10
-A10("result = da")
-A5 -- ploaie --> A11
-A11("result = da")
+A0("decision: timp")
+A0 -- sunny --> A1
+A1("decision: umiditate")
+A1 -- high --> A2
+A2("result = no")
+A1 -- normal --> A3
+A3("result = yes")
+A0 -- overcast --> A4
+A4("result = yes")
+A0 -- rainy --> A5
+A5("decision: vant")
+A5 -- False --> A6
+A6("result = yes")
+A5 -- True --> A7
+A7("result = no")
 </div></code></pre>
 <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
 <script>

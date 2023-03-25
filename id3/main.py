@@ -9,7 +9,7 @@ def main():
     Printer().print_node(tree)
 
     test_data = pandas.read_csv('data_test.csv')
-    run_decision_tree_and_print_results(tree, test_data)
+    # run_decision_tree_and_print_results(tree, test_data)
     
     # classifications = run_decision_tree(tree, data)
     # print(classifications == data[label])
