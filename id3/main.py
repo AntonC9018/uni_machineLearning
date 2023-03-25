@@ -147,7 +147,8 @@ class Printer:
 
             for child in node.children:
                 self.id += 1
-                print(f"{name} --> A{self.id}")
+                
+                print(f"{name} -- {child.feature_value} --> A{self.id}")
                 self.print_node(child)
 
 if __name__ == '__main__':
