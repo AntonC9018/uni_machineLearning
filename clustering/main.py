@@ -41,6 +41,7 @@ def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: 
         for k in range(len(centroids)):
             points = unlabeled_data[labels == k]
             if len(points) > 0:
+                # Have to reallocate the result, because pandas does not implement the out parameter 
                 centroids[k:] = numpy.mean(points, axis=0)
 
     return DataClusterizationResult(centroids, labels)
