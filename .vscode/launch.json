@@ -21,6 +21,15 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/linear_regression",
             "justMyCode": true
+        },
+        {
+            "name": "Python: clustering",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/clustering/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/clustering",
+            "justMyCode": true
         }
     ]
 }
