@@ -13,13 +13,13 @@ def generate_centroid(unlabeled_data: pandas.DataFrame) -> "list[float]":
     return [generate_point(unlabeled_data, i) for i in range(len(unlabeled_data.columns))]
 
 
-class KMeansResult:
+class DataClusterizationResult:
     def __init__(self, centroids: numpy.ndarray, labels: numpy.ndarray):
         self.centroids = centroids
         self.labels = labels
 
 
-def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: int) -> KMeansResult:
+def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: int) -> DataClusterizationResult:
     centroids = numpy.array([generate_centroid(unlabeled_data) for _ in range(num_clusters)])
 
     (num_samples, _) = unlabeled_data.shape
@@ -43,7 +43,7 @@ def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: 
             if len(points) > 0:
                 centroids[k:] = numpy.mean(points, axis=0)
 
-    return KMeansResult(centroids, labels)
+    return DataClusterizationResult(centroids, labels)
 
 
 import os
@@ -60,7 +60,7 @@ def main():
     # if not, run kmeans and serialize KMeansResult to a binary file
     # else, load KMeansResult from the binary file
     file_name = f'{dataset_file_name}_{max_iterations}_cache'
-    kmeansResult : KMeansResult = None
+    kmeansResult : DataClusterizationResult = None
 
     try:
         if os.path.exists(file_name):
@@ -85,51 +85,61 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-def run_graph_app(unlabeled_data: pandas.DataFrame, kmeansClusters: KMeansResult, dataset_name: str):
+def run_graph_app(unlabeled_data: pandas.DataFrame, kmeansClusters: DataClusterizationResult, dataset_name: str):
 
     # Set up Dash app
     app = dash.Dash(__name__)
 
-    features = unlabeled_data.columns
-    feature_combinations = [[features[i] for i in x] for x in itertools.combinations(range(4), 3)]
-    data_dict = {label: unlabeled_data[label] for label in unlabeled_data.columns}
-    data_dict['color'] = kmeansClusters.labels
-    figs_cache = [None] * len(feature_combinations)
-
-    # Define dimensions dropdown
-    dimensions_dropdown = dcc.Dropdown(
-        id='dimensions-dropdown',
-        options=[{ 'label': str.join(", ", x), 'value': i } 
-            for i, x in enumerate(feature_combinations)],
-        value=0
-    )
-
-    # Define plotly graph component
+    app_layout = [
+        html.H1(f'Clusterization of the dataset {dataset_name}'),
+    ]
     graph = dcc.Graph(id='scatter-plot')
 
-    # Define app layout
-    app.layout = html.Div([
-        html.H1(f'Clusterization of the dataset {dataset_name}'),
-        html.Label('Select dimensions to plot:'),
-        dimensions_dropdown,
-        graph
-    ])
+    features = unlabeled_data.columns
+    data_dict = {label: unlabeled_data[label] for label in unlabeled_data.columns}
+    data_dict['color'] = kmeansClusters.labels
 
-    # Define callback to update graph based on dimensions selection
-    @app.callback(
-        Output('scatter-plot', 'figure'),
-        [Input('dimensions-dropdown', 'value')]
-    )
-    def update_graph(index: int):
-        if figs_cache[index] != None:
-            return figs_cache[index]
+    if len(features) == 2:
+        fig = px.scatter(data_dict, x = features[0], y = features[1], color='color', height=500)
+        fig.update_layout(title=f'Clusters')
+        graph.figure = fig
 
-        dimensions = feature_combinations[index]
-        fig = px.scatter_3d(data_dict, x = dimensions[0], y = dimensions[1], z = dimensions[2], color='color', height=500)
-        fig.update_layout(title=f'Clusters of the Dimensions {str.join(", ", dimensions)}')
-        figs_cache[index] = fig
-        return fig
+    elif len(features) == 3:
+        fig = px.scatter_3d(data_dict, x = features[0], y = features[1], z = features[2], color='color', height=500)
+        fig.update_layout(title=f'Clusters')
+        graph.figure = fig
 
+    else:
+        feature_combinations = [[features[i] for i in x] for x in itertools.combinations(range(4), 3)]
+        figs_cache = [None] * len(feature_combinations)
+
+        # Define dimensions dropdown
+        dimensions_dropdown = dcc.Dropdown(
+            id='dimensions-dropdown',
+            options=[{ 'label': str.join(", ", x), 'value': i } 
+                for i, x in enumerate(feature_combinations)],
+            value=0
+        )
+        app_layout.append(html.Label('Select dimensions to plot:'))
+        app_layout.append(dimensions_dropdown)
+
+        # Define callback to update graph based on dimensions selection
+        @app.callback(
+            Output('scatter-plot', 'figure'),
+            [Input('dimensions-dropdown', 'value')]
+        )
+        def update_graph(index: int):
+            if figs_cache[index] != None:
+                return figs_cache[index]
+
+            dimensions = feature_combinations[index]
+            fig = px.scatter_3d(data_dict, x = dimensions[0], y = dimensions[1], z = dimensions[2], color='color', height=500)
+            fig.update_layout(title=f'Clusters of the Dimensions {str.join(", ", dimensions)}')
+            figs_cache[index] = fig
+            return fig
+    
+    app_layout.append(graph)
+    app.layout = html.Div(app_layout)
     app.run_server(debug=True)
     
 
