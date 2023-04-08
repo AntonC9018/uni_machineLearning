@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-n = 100
-xs = np.linspace(0, 1, num=n) + 0.3 * np.random.uniform(-1, 1, n)
-ys = np.linspace(0, 1, num=n)
+xs = np.array([0, -1, -2.5, -3, -4])
+ys = np.array([4, 2, 0, -2, -4])
+n = xs.shape[0]
 
 xy_sum = (xs * ys).sum()
 x_sum = xs.sum()

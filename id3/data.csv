@@ -1,12 +1,12 @@
 timp,temperatura,umiditate,vant,joc
 însorit,cald,normală,da,nu
-însorit,cald,normală,nu,da
-însorit,cald,normală,nu,da
+însorit,rece,normală,nu,da
+însorit,cald,mare,nu,da
 însorit,cald,normală,nu,da
 însorit,moderat,normală,da,nu
-însorit,moderat,normală,nu,da
-însorit,rece,mare,da,nu
-însorit,rece,mare,nu,da
+însorit,moderat,mare,nu,da
+înnorat,rece,mare,da,nu
+înnorat,rece,mare,nu,da
 înnorat,rece,normală,da,da
 înnorat,cald,normală,nu,da
 înnorat,moderat,mare,nu,nu

@@ -13,23 +13,27 @@ A1("decision: timp")
 A1 -- însorit --> A2
 A2("result = nu")
 A1 -- înnorat --> A3
-A3("result = da")
-A1 -- ploaie --> A4
-A4("result = nu")
-A0 -- nu --> A5
-A5("decision: timp")
-A5 -- însorit --> A6
-A6("result = da")
-A5 -- înnorat --> A7
-A7("decision: temperatura")
-A7 -- cald --> A8
+A3("decision: umiditate")
+A3 -- normală --> A4
+A4("result = da")
+A3 -- mare --> A5
+A5("result = nu")
+A1 -- ploaie --> A6
+A6("result = nu")
+A0 -- nu --> A7
+A7("decision: timp")
+A7 -- însorit --> A8
 A8("result = da")
-A7 -- moderat --> A9
-A9("result = nu")
-A7 -- rece --> A10
+A7 -- înnorat --> A9
+A9("decision: temperatura")
+A9 -- cald --> A10
 A10("result = da")
-A5 -- ploaie --> A11
+A9 -- rece --> A11
 A11("result = da")
+A9 -- moderat --> A12
+A12("result = nu")
+A7 -- ploaie --> A13
+A13("result = da")
 </div></code></pre>
 <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
 <script>

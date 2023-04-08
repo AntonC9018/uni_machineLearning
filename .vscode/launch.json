@@ -12,6 +12,15 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/id3",
             "justMyCode": true
+        },
+        {
+            "name": "Python: linear_regression",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/linear_regression/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/linear_regression",
+            "justMyCode": true
         }
     ]
 }
