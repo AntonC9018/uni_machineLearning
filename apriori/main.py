@@ -62,12 +62,12 @@ def apriori(data: Dataset, min_support: int, set_size: int) -> SubsetFrequencies
             else:
                 candidate_set[item] += 1
 
-    for key, value in list(candidate_set.items()):
-        if value < min_support:
-            del candidate_set[key]
+    c1: SubsetFrequencies = {}
+    for key, value in candidate_set.items():
+        if value >= min_support:
+            c1[Subset([key])] = value
 
-    c1: SubsetFrequencies = {Subset([key]): value for key, value in candidate_set.items()}
-    c0 = {}
+    c0: SubsetFrequencies = {}
 
     k = 2
     while k <= set_size:
