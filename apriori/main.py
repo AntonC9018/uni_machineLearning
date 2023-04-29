@@ -7,8 +7,14 @@ Subset = frozenset
 
 
 def main():
+    set_size = 3
+    min_support = 2
+    min_confidence = 0.5
+
     data = read_data('data.txt')
-    result: SubsetFrequencies = apriori(data, 2, min_size=3)
+    result: SubsetFrequencies = apriori(data,
+                                        min_support=min_support,
+                                        set_size=set_size)
 
     for frequent_items, count in result.items():
         print(
@@ -17,7 +23,8 @@ def main():
             count,
             sep='')
 
-        rules_it = get_rules(data, count, frequent_items, min_confidence=0.5)
+        rules_it = get_rules(data, count, frequent_items,
+                             min_confidence=min_confidence)
         rules = list(rules_it)
         rules.sort(key=lambda r: -r.confidence)
 
@@ -42,8 +49,8 @@ def read_data(file_name: str) -> Dataset:
         return [frozenset(line.strip().split(',')) for line in file]
 
 
-def apriori(data: Dataset, min_support: int, min_size: int) -> SubsetFrequencies:
-    assert (min_size > 1)
+def apriori(data: Dataset, min_support: int, set_size: int) -> SubsetFrequencies:
+    assert (set_size > 1)
 
     candidate_set: dict[object, int] = {}
     for row in data:
@@ -61,7 +68,7 @@ def apriori(data: Dataset, min_support: int, min_size: int) -> SubsetFrequencies
     c0 = {}
 
     k = 2
-    while k <= min_size:
+    while k <= set_size:
         c0, c1 = c1, c0
         c1.clear()
         for key1 in c0.keys():
@@ -76,6 +83,7 @@ def apriori(data: Dataset, min_support: int, min_size: int) -> SubsetFrequencies
                 union = key1.union(key2)
                 if union in c1:
                     continue
+
                 count = get_count(data, union)
                 if count >= min_support:
                     c1[union] = count
@@ -100,18 +108,18 @@ class Rule:
 
 
 def get_rules(data: Dataset, count: int, frequent_set: Subset, min_confidence: float) -> "Iterable[Rule]":
-    def non_empty_subsets(s: list) -> "Iterable[Subset]":
-        for r in range(1, len(s)):
-            for subset in combinations(s, r):
+    def non_empty_subsets(items: list) -> "Iterable[Subset]":
+        for size in range(1, len(items)):
+            for subset in combinations(items, size):
                 yield Subset(subset)
 
-    for itemset in non_empty_subsets(list(frequent_set)):
-        antecedent = itemset
+    for subset in non_empty_subsets(list(frequent_set)):
+        antecedent = subset
         count_antecedent = get_count(data, antecedent)
         confidence = count / count_antecedent
 
         if confidence >= min_confidence:
-            consequent = frequent_set.difference(itemset)
+            consequent = frequent_set.difference(subset)
             yield Rule(antecedent, consequent, confidence)
 
 
