@@ -1,0 +1,10 @@
+a,b,d,e,f
+b,c,f
+a,d,e,f
+e,f
+a,e,f
+a,b,e,f
+a,c,f
+e,f
+a,b,d
+b,c,d
