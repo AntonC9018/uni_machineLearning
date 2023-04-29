@@ -1,6 +1,5 @@
-from itertools import chain, combinations
+from itertools import combinations
 from typing import Iterable
-import os
 
 Dataset = list[frozenset]
 SubsetFrequencies = dict[frozenset, int]
