@@ -12,9 +12,10 @@ def main():
     min_confidence = 0.5
 
     data = read_data('data.txt')
-    result: SubsetFrequencies = apriori(data,
-                                        min_support=min_support,
-                                        set_size=set_size)
+    result: SubsetFrequencies = apriori(
+        data,
+        min_support=min_support,
+        set_size=set_size)
 
     for frequent_items, count in result.items():
         print(
@@ -23,8 +24,9 @@ def main():
             count,
             sep='')
 
-        rules_it = get_rules(data, count, frequent_items,
-                             min_confidence=min_confidence)
+        rules_it = get_rules(
+            data, count, frequent_items,
+            min_confidence=min_confidence)
         rules = list(rules_it)
         rules.sort(key=lambda r: -r.confidence)
 
