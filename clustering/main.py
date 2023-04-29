@@ -2,12 +2,15 @@ import itertools
 import pandas
 import numpy
 import random
-import plotly.graph_objs as go
+import os
+import pickle
+
 
 def generate_point(unlabeled_data: pandas.DataFrame, i: int) -> float:
     min = numpy.min(unlabeled_data.iloc[:, i])
     max = numpy.max(unlabeled_data.iloc[:, i])
     return random.uniform(min, max)
+
 
 def generate_centroid(unlabeled_data: pandas.DataFrame) -> "list[float]":
     return [generate_point(unlabeled_data, i) for i in range(len(unlabeled_data.columns))]
@@ -36,7 +39,7 @@ def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: 
             values_buffer *= values_buffer
             numpy.sum(values_buffer, axis=1, out=distances_buffer)
             labels[j] = numpy.argmin(distances_buffer)
-        
+
         # Update centroids based on the assigned points
         for k in range(len(centroids)):
             points = unlabeled_data[labels == k]
@@ -46,9 +49,6 @@ def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: 
 
     return DataClusterizationResult(centroids, labels)
 
-
-import os
-import pickle
 
 def main():
     dataset_file_name = 'irises.csv'
@@ -61,22 +61,22 @@ def main():
     # if not, run kmeans and serialize KMeansResult to a binary file
     # else, load KMeansResult from the binary file
     file_name = f'{dataset_file_name}_{max_iterations}_cache'
-    kmeansResult : DataClusterizationResult = None
+    kmeans_result: DataClusterizationResult = None
 
     try:
         if os.path.exists(file_name):
             with open(file_name, 'rb') as file:
-                kmeansResult = pickle.load(file)
-    except:
+                kmeans_result = pickle.load(file)
+    except OSError:
         pass
 
-    if (kmeansResult == None):
+    if kmeans_result is None:
         num_clusters = data[label].unique().shape[0]
-        kmeansResult = kmeans(unlabeled_data, num_clusters, max_iterations)
+        kmeans_result = kmeans(unlabeled_data, num_clusters, max_iterations)
         with open(file_name, 'wb') as file:
-            pickle.dump(kmeansResult, file)
+            pickle.dump(kmeans_result, file)
 
-    run_graph_app(unlabeled_data, kmeansResult, dataset_file_name)
+    run_graph_app(unlabeled_data, kmeans_result, dataset_file_name)
 
 
 import plotly.express as px
@@ -86,8 +86,8 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-def run_graph_app(unlabeled_data: pandas.DataFrame, kmeansClusters: DataClusterizationResult, dataset_name: str):
 
+def run_graph_app(unlabeled_data: pandas.DataFrame, kmeans_clusters: DataClusterizationResult, dataset_name: str):
     # Set up Dash app
     app = dash.Dash(__name__)
 
@@ -98,15 +98,15 @@ def run_graph_app(unlabeled_data: pandas.DataFrame, kmeansClusters: DataClusteri
 
     features = unlabeled_data.columns
     data_dict = {label: unlabeled_data[label] for label in unlabeled_data.columns}
-    data_dict['color'] = kmeansClusters.labels
+    data_dict['color'] = kmeans_clusters.labels
 
     if len(features) == 2:
-        fig = px.scatter(data_dict, x = features[0], y = features[1], color='color', height=500)
+        fig = px.scatter(data_dict, x=features[0], y=features[1], color='color', height=500)
         fig.update_layout(title=f'Clusters')
         graph.figure = fig
 
     elif len(features) == 3:
-        fig = px.scatter_3d(data_dict, x = features[0], y = features[1], z = features[2], color='color', height=500)
+        fig = px.scatter_3d(data_dict, x=features[0], y=features[1], z=features[2], color='color', height=500)
         fig.update_layout(title=f'Clusters')
         graph.figure = fig
 
@@ -117,8 +117,8 @@ def run_graph_app(unlabeled_data: pandas.DataFrame, kmeansClusters: DataClusteri
         # Define dimensions dropdown
         dimensions_dropdown = dcc.Dropdown(
             id='dimensions-dropdown',
-            options=[{ 'label': str.join(", ", x), 'value': i } 
-                for i, x in enumerate(feature_combinations)],
+            options=[{'label': str.join(", ", x), 'value': i}
+                     for i, x in enumerate(feature_combinations)],
             value=0
         )
         app_layout.append(html.Label('Select dimensions to plot:'))
@@ -134,17 +134,15 @@ def run_graph_app(unlabeled_data: pandas.DataFrame, kmeansClusters: DataClusteri
                 return figs_cache[index]
 
             dimensions = feature_combinations[index]
-            fig = px.scatter_3d(data_dict, x = dimensions[0], y = dimensions[1], z = dimensions[2], color='color', height=500)
+            fig = px.scatter_3d(data_dict, x=dimensions[0], y=dimensions[1], z=dimensions[2], color='color', height=500)
             fig.update_layout(title=f'Clusters of the Dimensions {str.join(", ", dimensions)}')
             figs_cache[index] = fig
             return fig
-    
+
     app_layout.append(graph)
     app.layout = html.Div(app_layout)
     app.run_server(debug=True)
-    
 
-if (__name__ == '__main__'):
+
+if __name__ == '__main__':
     main()
-
-
