@@ -16,13 +16,13 @@ def generate_centroid(unlabeled_data: pandas.DataFrame) -> "list[float]":
     return [generate_point(unlabeled_data, i) for i in range(len(unlabeled_data.columns))]
 
 
-class DataClusterizationResult:
+class DataClusteringResult:
     def __init__(self, centroids: numpy.ndarray, labels: numpy.ndarray):
         self.centroids = centroids
         self.labels = labels
 
 
-def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: int) -> DataClusterizationResult:
+def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: int) -> DataClusteringResult:
     centroids = numpy.array([generate_centroid(unlabeled_data) for _ in range(num_clusters)])
 
     (num_samples, _) = unlabeled_data.shape
@@ -47,7 +47,7 @@ def kmeans(unlabeled_data: pandas.DataFrame, num_clusters: int, max_iterations: 
                 # Have to reallocate the result, because pandas does not implement the out parameter 
                 centroids[k:] = numpy.mean(points, axis=0)
 
-    return DataClusterizationResult(centroids, labels)
+    return DataClusteringResult(centroids, labels)
 
 
 def main():
@@ -61,7 +61,7 @@ def main():
     # if not, run kmeans and serialize KMeansResult to a binary file
     # else, load KMeansResult from the binary file
     file_name = f'{dataset_file_name}_{max_iterations}_cache'
-    kmeans_result: DataClusterizationResult = None
+    kmeans_result: DataClusteringResult = None
 
     try:
         if os.path.exists(file_name):
@@ -80,14 +80,13 @@ def main():
 
 
 import plotly.express as px
-import pandas as pd
 import dash
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
 
-def run_graph_app(unlabeled_data: pandas.DataFrame, kmeans_clusters: DataClusterizationResult, dataset_name: str):
+def run_graph_app(unlabeled_data: pandas.DataFrame, kmeans_clusters: DataClusteringResult, dataset_name: str):
     # Set up Dash app
     app = dash.Dash(__name__)
 
@@ -130,7 +129,7 @@ def run_graph_app(unlabeled_data: pandas.DataFrame, kmeans_clusters: DataCluster
             [Input('dimensions-dropdown', 'value')]
         )
         def update_graph(index: int):
-            if figs_cache[index] != None:
+            if figs_cache[index] is not None:
                 return figs_cache[index]
 
             dimensions = feature_combinations[index]
